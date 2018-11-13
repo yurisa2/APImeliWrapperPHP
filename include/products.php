@@ -17,49 +17,51 @@ class products extends melis
     return $product_list;
   }
 
-  public function update_product($product_data, $mlb)
+  public function update_product_information($product_data)
   {
-    global $app_Id;
-    global $secret_Key;
-    global $DEBUG;
-    global $ajuste_preco_multiplicacao;
-    global $ajuste_estoque;
-    global $ajuste_preco_soma;
-    global $sufixo_prod;
-    global $prefixo_prod;
-    global $marca;
+    $params = array('access_token' => $this->access_token);
+    $mlb = $product_data['mlb'];
+    $body = array(
+      'title' => $product_data['title'],
+      'price' => $product_data['price'],
+      'available_quantity' => $product_data['available_quantity'],
+      'attributes' =>
+      array(
+        array('name' => "Marca",
+        'value_name' => $product_data['marca']),
+        array('id' => "MODEL",
+        'value_name' => $product_data['sku']))
+    );
+
+    $result = $this->meli->put('/items/MLB'.$mlb, $body, $params);
+
+    return $result;
+  }
 
 
-    $produto = magento_product_summary($SKU);
-    echo "produto";var_dump($produto);
-    if(!$produto) return 0;
-    $title = $prefixo_prod.$produto['name'].$sufixo_prod;
-
-    if (strlen($title) > 60) $title = $prefixo_prod.$produto['name'];
-
-    $price = round(($produto['price'] * $ajuste_preco_multiplicacao)+$ajuste_preco_soma,2);
-    $available_quantity = floor($produto['qty_in_stock'] + ($produto['qty_in_stock']*$ajuste_estoque));
-
-    if($available_quantity < 0) $available_quantity = 0;
-
+  public function update_product_description($product_data)
+  {
+    $mlb = $product_data['mlb'];
     $params = array('access_token' => $this->access_token);
 
     $body = array
     (
-      'title' => $title,
-      'price' => $price,
-      'available_quantity' => $available_quantity,
-      'attributes' =>
-      array(
-        array('name' => "Marca",
-        'value_name' => $marca),
-        array('id' => "MODEL",
-        'value_name' => $SKU)
-      )
+      'plain_text' => $product_data['description']
     );
 
+    $result = $this->meli->put('/items/MLB'.$mlb.'/description', $body, $params);
 
-    $result = $this->meli->put('/items/MLB'.$mlb, $body, $params);
+
+    return $result;
+  }
+
+
+  public function update_product($product_data)
+  {
+    $product_info = update_product_information($product_data);
+    $product_description = update_product_description($$product_data);
+
+    $result = array($product_info,$product_description);
 
     return $result;
   }
