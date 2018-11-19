@@ -9,12 +9,20 @@ class products extends melis
       'limit' => 100
     );
 
-    $result = $this->meli->get($url, $params);
+    $return = $this->meli->get($url, $params);
 
-    $product_list = $result['body']->results;
-    $product_list = array_unique($product_list);
+    return $return->results;
+  }
 
-    return $product_list;
+  public function get_product($product_id)
+  {
+    $params = array(
+      'access_token' => $this->access_token,
+    );
+
+    $return = $this->meli->get("items/$product_id", $params);
+
+    return $return;
   }
 
   public function update_product_information($product_data)
@@ -33,9 +41,9 @@ class products extends melis
         'value_name' => $product_data['sku']))
     );
 
-    $result = $this->meli->put('/items/MLB'.$mlb, $body, $params);
+    $return = $this->meli->put('/items/MLB'.$mlb, $body, $params);
 
-    return $result;
+    return $return;
   }
 
 
@@ -49,10 +57,10 @@ class products extends melis
       'plain_text' => $product_data['description']
     );
 
-    $result = $this->meli->put('/items/MLB'.$mlb.'/description', $body, $params);
+    $return = $this->meli->put('/items/MLB'.$mlb.'/description', $body, $params);
 
 
-    return $result;
+    return $return;
   }
 
 
@@ -61,12 +69,36 @@ class products extends melis
     $product_info = update_product_information($product_data);
     $product_description = update_product_description($$product_data);
 
-    $result = array($product_info,$product_description);
+    $return = array($product_info,$product_description);
 
-    return $result;
+    return $return;
   }
 
-
+  public function put_product($product_data)
+  {
+    array(
+      'title' => $product_data['title'],
+      'category_id' => "MLA3530",
+      'price' => $product_data['price'],
+      'currency_id' => "ARS",
+      'available_quantity' => $product_data['qty'],
+      'buying_mode' => "buy_it_now",
+      'listing_type_id' => "gold_special",
+      'description' => $product_data['description'],
+      'attributes' => [
+        array('id'  => "ITEM_CONDITION",
+              'value_name' => "Novo"),
+        array('id'  => "BRAND",
+              'value_name' => BRAND),
+        array('id'  => "MODEL",
+              'value_name' => $product_data['sku'])],
+      'sale_terms' => [
+        array('id' => "WARRANTY_TIME", 'value_name' => "90 dias")
+      ],
+      'pictures' =>[
+        array('source' =>"http://mla-s2-p.mlstatic.com/968521-MLA20805195516_072016-O.jpg")
+      ]);
+  }
 
 
 
