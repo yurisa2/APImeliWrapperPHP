@@ -7,6 +7,6 @@ require_once 'include/defines.php';
 
 require_once 'include/meli.php';
 require_once 'include/products.php';
-require_once 'include/product_image.php';
+require_once 'include/product_images.php';
 require_once 'include/orders.php';
 ?>
