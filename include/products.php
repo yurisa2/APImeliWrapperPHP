@@ -1,7 +1,7 @@
 <?php
 class products extends melis
 {
-  public function get_products()
+  public function meliGetProducts()
   {
     $url = '/users/' .USER_ID. '/items/search';
     $params = array(
@@ -9,36 +9,46 @@ class products extends melis
       'limit' => 100
     );
 
-    $return = $this->meli->get($url, $params);
+    $productsId = $meli->get($url, $params);
 
-    return $return->results;
+    $params2 = array(
+      'access_token' => token(),
+      'limit' => 100,
+      'offset' => 100,
+    );
+    $productsId2 = $meli->get($url, $params2);
+
+    $allProductsId = array_merge($productsId,$productsId2);
+    $allProductsId = array_unique($allProductsId);
+
+    return $allProductsId;
   }
 
-  public function get_product($product_id)
+  public function meliGetProduct($productId)
   {
     $params = array(
       'access_token' => $this->access_token,
     );
 
-    $return = $this->meli->get("items/$product_id", $params);
+    $return = $this->meli->get("items/$productId", $params);
 
     return $return;
   }
 
-  public function update_product_information($product_data)
+  public function meliUpdateProduct($productData)
   {
     $params = array('access_token' => $this->access_token);
-    $mlb = $product_data['mlb'];
+    $mlb = $productData['mlb'];
     $body = array(
-      'title' => $product_data['title'],
-      'price' => $product_data['price'],
-      'available_quantity' => $product_data['available_quantity'],
+      'title' => $productData['title'],
+      'price' => $productData['price'],
+      'available_quantity' => $productData['available_quantity'],
       'attributes' =>
       array(
         array('name' => "Marca",
-        'value_name' => $product_data['marca']),
+        'value_name' => $productData['marca']),
         array('id' => "MODEL",
-        'value_name' => $product_data['sku']))
+        'value_name' => $productData['sku']))
     );
 
     $return = $this->meli->put('/items/MLB'.$mlb, $body, $params);
@@ -47,14 +57,14 @@ class products extends melis
   }
 
 
-  public function update_product_description($product_data)
+  public function meliUpdateProductDescription($productData)
   {
-    $mlb = $product_data['mlb'];
+    $mlb = $productData['mlb'];
     $params = array('access_token' => $this->access_token);
 
     $body = array
     (
-      'plain_text' => $product_data['description']
+      'plain_text' => $productData['description']
     );
 
     $return = $this->meli->put('/items/MLB'.$mlb.'/description', $body, $params);
@@ -63,35 +73,36 @@ class products extends melis
     return $return;
   }
 
-
-  public function update_product($product_data)
+  public function meliUpdateProductImages($productId, $images_url)
   {
-    $product_info = update_product_information($product_data);
-    $product_description = update_product_description($$product_data);
+    $mlb = $productId;
+    $params = array('access_token' => token());
+    $body = array('pictures' => $images_url);
 
-    $return = array($product_info,$product_description);
+    $return = $meli->put("/items/MLB$mlb", $body, $params);
 
     return $return;
   }
 
-  public function put_product($product_data)
+
+  public function meliCreateProduct($productData)
   {
     array(
-      'title' => $product_data['title'],
+      'title' => $productData['title'],
       'category_id' => "MLA3530",
-      'price' => $product_data['price'],
+      'price' => $productData['price'],
       'currency_id' => "ARS",
-      'available_quantity' => $product_data['qty'],
+      'available_quantity' => $productData['qty'],
       'buying_mode' => "buy_it_now",
       'listing_type_id' => "gold_special",
-      'description' => $product_data['description'],
+      'description' => $productData['description'],
       'attributes' => [
         array('id'  => "ITEM_CONDITION",
               'value_name' => "Novo"),
         array('id'  => "BRAND",
               'value_name' => BRAND),
         array('id'  => "MODEL",
-              'value_name' => $product_data['sku'])],
+              'value_name' => $productData['sku'])],
       'sale_terms' => [
         array('id' => "WARRANTY_TIME", 'value_name' => "90 dias")
       ],
@@ -99,7 +110,6 @@ class products extends melis
         array('source' =>"http://mla-s2-p.mlstatic.com/968521-MLA20805195516_072016-O.jpg")
       ]);
   }
-
 
 
 }

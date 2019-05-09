@@ -1,7 +1,7 @@
 <?php
 class orders extends melis
 {
-  public function get_order_information($order_id)
+  public function meliGetOrder($order_id)
   {
     $params = array('access_token' => $this->access_token);
     $return = $meli->get("/orders/$order_id", $params);
@@ -9,17 +9,27 @@ class orders extends melis
     return $return['body'];
   }
 
-  public function get_orders()
+  public function meliGetOrders()
   {
-    $params = array('access_token' => $this->access_token,
-    'seller' => USER_ID, 'order.status' => "paid");
+    $params = array(
+      'access_token' => token(),
+      'seller' => $user_id
+    );
 
-    $return = $meli->get("/orders/search", $params);
+    $response = $meli->get("/orders/search/recent", $params);
 
-    return $return['body'];
+    return $return['body']->results;
   }
 
-  public function get_order_label($shipment_ids, $nome, $order_id)
+  public function meliGetOrderIds()
+  {
+    $recentOrders = $this->meliGetOrders();
+    foreach ($recentOrders as $key => $value) $ordersId[] = $value->id;
+
+    return $ordersId;
+  }
+
+  public function meliGetOrderLabel($shipment_ids, $nome, $order_id)
   {
     $filename = "etiquetas/$order_id-$nome.pdf";
     $curl_url =  "https://api.mercadolibre.com/shipment_labels?shipment_ids=$shipment_ids&response_type=pdf&access_token=$this->accesstoken";
